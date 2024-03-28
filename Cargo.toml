@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "server",
+    "types",
+]
+resolver = "2"
+
+[workspace.dependencies]
+serde = { version = "1.0.197", features = ["derive"] }
+thiserror = "1.0.58"
+candid = "0.10.6"
+log = "0.4.21"
