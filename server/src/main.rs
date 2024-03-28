@@ -8,6 +8,7 @@ use ntex::web;
 
 use error::*;
 use state::AppState;
+use api::*;
 
 pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
     CloudflareAuth::new(Credentials {
@@ -30,6 +31,8 @@ async fn main() -> Result<()> {
     web::HttpServer::new(move || {
         web::App::new()
             .state(state.clone())
+            .service(set_user_metadata)
+            .service(get_user_metadata)
     })
     .bind(conf.bind_address)?
     .run()
