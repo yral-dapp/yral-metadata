@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for yral-metadata on 2024-03-29T18:25:06+05:30
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'yral-metadata'
+primary_region = 'sin'
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+CLOUDFLARE_ACCOUNT_ID = "a209c523d2d9646cc56227dbe6ce3ede"
+CLOUDFLARE_KV_NAMESPACE = "61b0bc37fa504b8fb347e020e8772003"
