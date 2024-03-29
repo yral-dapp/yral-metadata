@@ -1,8 +1,5 @@
 [workspace]
-members = [
-    "server",
-    "types",
-]
+members = ["server", "types"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -10,3 +7,4 @@ serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 candid = "0.10.6"
 log = "0.4.21"
+yral-identity = { git = "https://github.com/go-bazzinga/yral-identity.git", rev = "6719144792d5831a0a3a332a1dc75141076b6c9c" }

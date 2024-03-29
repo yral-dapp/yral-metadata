@@ -11,8 +11,10 @@ pub enum Error {
     IO(#[from] std::io::Error),
     #[error("failed to load config {0}")]
     Config(#[from] config::ConfigError),
-    #[error("cloudflare error {0}")]
+    #[error("{0}")]
     Cloudflare(#[from] gob_cloudflare::Error),
+    #[error("{0}")]
+    Identity(#[from] yral_identity::Error),
 }
 
 impl From<&Error> for ApiResult<()> {
@@ -22,6 +24,7 @@ impl From<&Error> for ApiResult<()> {
                 log::warn!("internal error {value}");
                 ApiError::Unknown("internal error, reported".into())
             }
+            Error::Identity(_) => ApiError::InvalidSignature,
             Error::Cloudflare(e) => {
                 log::warn!("cloudflare error {e}");
                 ApiError::Cloudflare
@@ -44,6 +47,7 @@ impl web::error::WebResponseError for Error {
             Error::IO(_) | Error::Config(_) | Error::Cloudflare(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
+            Error::Identity(_) => StatusCode::UNAUTHORIZED,
         }
     }
 }

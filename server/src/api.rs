@@ -3,19 +3,22 @@ use ntex::web::{
     self,
     types::{Json, Path, State},
 };
-use types::{ApiResult, SetUserMetadataRes, UserMetadata};
+use types::{ApiResult, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
 
 use crate::{state::AppState, Result};
 
 #[web::post("/metadata/{user_principal}")]
 async fn set_user_metadata(
     state: State<AppState>,
-    path: Path<Principal>,
-    metadata: Json<UserMetadata>,
+    user_principal: Path<Principal>,
+    req: Json<SetUserMetadataReq>,
 ) -> Result<Json<ApiResult<SetUserMetadataRes>>> {
-    let user = path.to_text();
+    let signature = req.0.signature;
+    let metadata = req.0.metadata;
+    signature.verify_identity(*user_principal.as_ref(), metadata.clone().into())?;
 
-    let req = state.kv_namespace.write_kv(user).metadata(&metadata.0)?;
+    let user = user_principal.to_text();
+    let req = state.kv_namespace.write_kv(user).metadata(&metadata)?;
     state.cloudflare.send_auth_multipart(req).await?;
 
     Ok(Json(Ok(())))
