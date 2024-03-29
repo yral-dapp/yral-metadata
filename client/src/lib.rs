@@ -8,7 +8,7 @@ use consts::DEFAULT_API_URL;
 use ic_agent::{export::Principal, Identity};
 use reqwest::Url;
 use types::{ApiResult, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
-use yral_identity::WrappedIdentity;
+use yral_identity::identity::WrappedIdentity;
 
 #[derive(Clone, Debug)]
 pub struct MetadataClient {

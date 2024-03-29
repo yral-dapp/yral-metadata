@@ -4558,7 +4558,7 @@ checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
 [[package]]
 name = "yral-identity"
 version = "0.1.0"
-source = "git+https://github.com/go-bazzinga/yral-identity.git?rev=6719144792d5831a0a3a332a1dc75141076b6c9c#6719144792d5831a0a3a332a1dc75141076b6c9c"
+source = "git+https://github.com/go-bazzinga/yral-identity.git?rev=9ad5059314e7e736a36ae473b44d68405c14a229#9ad5059314e7e736a36ae473b44d68405c14a229"
 dependencies = [
  "candid",
  "ic-agent",
