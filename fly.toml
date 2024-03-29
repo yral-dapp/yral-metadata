@@ -17,10 +17,10 @@ primary_region = 'sin'
   processes = ['app']
 
 [[vm]]
-  memory = '512mb'
+  memory = '256mb'
   cpu_kind = 'shared'
   cpus = 1
 
 [env]
 CLOUDFLARE_ACCOUNT_ID = "a209c523d2d9646cc56227dbe6ce3ede"
-CLOUDFLARE_KV_NAMESPACE = "61b0bc37fa504b8fb347e020e8772003"
+CLOUDFLARE_KV_NAMESPACE = "7ded573447b34fc8afd258705a76193a"
