@@ -15,4 +15,4 @@ thiserror.workspace = true
 candid.workspace = true
 log.workspace = true
 env_logger = "0.11.3"
-yral-identity = { workspace = true, default-features = false }
+yral-identity = { workspace = true, default-features = false, features = ["ic-git"] }

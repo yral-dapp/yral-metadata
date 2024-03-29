@@ -8,7 +8,7 @@ use consts::DEFAULT_API_URL;
 use ic_agent::{export::Principal, Identity};
 use reqwest::Url;
 use types::{ApiResult, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
-use yral_identity::identity::WrappedIdentity;
+use yral_identity::ic_agent::sign_message;
 
 #[derive(Clone, Debug)]
 pub struct MetadataClient {
@@ -33,12 +33,12 @@ impl MetadataClient {
         }
     }
 
-    pub async fn set_user_metadata<I: Identity>(
+    pub async fn set_user_metadata(
         &self,
-        identity: &WrappedIdentity<I>,
+        identity: &impl Identity,
         metadata: UserMetadata,
     ) -> Result<SetUserMetadataRes> {
-        let signature = identity.sign_message(metadata.clone().into())?;
+        let signature = sign_message(identity, metadata.clone().into())?;
         // unwrap safety: we know the sender is present because we just signed the message
         let sender = identity.sender().unwrap();
         let api_url = self
