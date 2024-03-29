@@ -29,3 +29,5 @@ pub struct SetUserMetadataReq {
 }
 
 pub type SetUserMetadataRes = ();
+
+pub type GetUserMetadataRes = Option<UserMetadata>;

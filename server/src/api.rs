@@ -3,7 +3,7 @@ use ntex::web::{
     self,
     types::{Json, Path, State},
 };
-use types::{ApiResult, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
+use types::{ApiResult, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
 
 use crate::{state::AppState, Result};
 
@@ -28,9 +28,19 @@ async fn set_user_metadata(
 async fn get_user_metadata(
     state: State<AppState>,
     path: Path<Principal>,
-) -> Result<Json<ApiResult<UserMetadata>>> {
+) -> Result<Json<ApiResult<GetUserMetadataRes>>> {
     let user = path.to_text();
     let req = state.kv_namespace.read_kv_metadata::<UserMetadata>(user);
-    let res = state.cloudflare.send_auth(req).await?;
-    Ok(Json(Ok(res.0)))
+    let res = state.cloudflare.send_auth(req).await;
+    let meta = match res {
+        Ok(meta) => Some(meta.0),
+        Err(gob_cloudflare::Error::Cloudflare(e))
+            if e[0].message == "metadata: 'key not found'" =>
+        {
+            None
+        }
+        Err(e) => return Err(e.into()),
+    };
+
+    Ok(Json(Ok(meta)))
 }

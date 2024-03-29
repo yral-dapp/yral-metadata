@@ -1,0 +1,18 @@
+[package]
+name = "yral-metadata-client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+types = { path = "../types", package = "yral-metadata-types" }
+yral-identity.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "http2"] }
+thiserror.workspace = true
+ic-agent = "0.34.0"
+
+[features]
+native-tls = ["reqwest/native-tls"]
+rustls-tls = ["reqwest/rustls-tls"]
+default = ["native-tls"]
