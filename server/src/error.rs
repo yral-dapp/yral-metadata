@@ -1,4 +1,7 @@
-use ntex::{http::{header, StatusCode}, web};
+use ntex::{
+    http::{header, StatusCode},
+    web,
+};
 use thiserror::Error;
 use types::{error::ApiError, ApiResult};
 
@@ -9,7 +12,7 @@ pub enum Error {
     #[error("failed to load config {0}")]
     Config(#[from] config::ConfigError),
     #[error("cloudflare error {0}")]
-    Cloudflare(#[from] gob_cloudflare::Error)
+    Cloudflare(#[from] gob_cloudflare::Error),
 }
 
 impl From<&Error> for ApiResult<()> {
@@ -18,7 +21,7 @@ impl From<&Error> for ApiResult<()> {
             Error::IO(_) | Error::Config(_) => {
                 log::warn!("internal error {value}");
                 ApiError::Unknown("internal error, reported".into())
-            },
+            }
             Error::Cloudflare(e) => {
                 log::warn!("cloudflare error {e}");
                 ApiError::Cloudflare
@@ -38,8 +41,10 @@ impl web::error::WebResponseError for Error {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Error::IO(_) | Error::Config(_) | Error::Cloudflare(_) => StatusCode::INTERNAL_SERVER_ERROR,
-        } 
+            Error::IO(_) | Error::Config(_) | Error::Cloudflare(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        }
     }
 }
 

@@ -4,5 +4,5 @@ use serde::{Deserialize, Serialize};
 #[non_exhaustive]
 pub enum ApiError {
     Cloudflare,
-    Unknown(String)
+    Unknown(String),
 }

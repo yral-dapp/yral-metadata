@@ -6,9 +6,9 @@ use config::AppConfig;
 use gob_cloudflare::{api::kv::KvNamespace, CloudflareAuth, Credentials};
 use ntex::web;
 
+use api::*;
 use error::*;
 use state::AppState;
-use api::*;
 
 pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
     CloudflareAuth::new(Credentials {
