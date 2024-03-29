@@ -8,6 +8,7 @@ use ntex::web;
 
 use api::*;
 use error::*;
+use ntex_cors::Cors;
 use state::AppState;
 
 pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
@@ -30,6 +31,7 @@ async fn main() -> Result<()> {
 
     web::HttpServer::new(move || {
         web::App::new()
+            .wrap(Cors::default())
             .state(state.clone())
             .service(set_user_metadata)
             .service(get_user_metadata)

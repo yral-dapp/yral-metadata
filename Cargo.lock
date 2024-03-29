@@ -729,6 +729,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_more"
+version = "0.99.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+dependencies = [
+ "convert_case 0.4.0",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "dfn_core"
 version = "0.9.0"
 source = "git+https://github.com/dfinity/ic.git?rev=release-2024-03-20_23-01+hotfix#88e489c293ce2d6ede5aef1866775ca7eab614a6"
@@ -969,12 +982,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "futures"
+version = "0.3.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "645c6916888f6cb6350d2550b80fb63e734897a8498abe35cfb732b6487804b0"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-executor",
+ "futures-io",
+ "futures-sink",
+ "futures-task",
+ "futures-util",
+]
+
+[[package]]
 name = "futures-channel"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eac8f7d7865dcb88bd4373ab671c8cf4508703796caa2b1985a9ca867b3fcb78"
 dependencies = [
  "futures-core",
+ "futures-sink",
 ]
 
 [[package]]
@@ -982,6 +1011,23 @@ name = "futures-core"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dfc6580bb841c5a68e9ef15c77ccc837b40a7504914d52e47b8b0e9bbda25a1d"
+
+[[package]]
+name = "futures-executor"
+version = "0.3.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a576fc72ae164fca6b9db127eaa9a9dda0d61316034f33a0a0d4eda41f02b01d"
+dependencies = [
+ "futures-core",
+ "futures-task",
+ "futures-util",
+]
+
+[[package]]
+name = "futures-io"
+version = "0.3.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
 
 [[package]]
 name = "futures-macro"
@@ -1018,9 +1064,13 @@ version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
 dependencies = [
+ "futures-channel",
  "futures-core",
+ "futures-io",
  "futures-macro",
+ "futures-sink",
  "futures-task",
+ "memchr",
  "pin-project-lite",
  "pin-utils",
  "slab",
@@ -1079,8 +1129,9 @@ checksum = "4271d37baee1b8c7e4b708028c57d816cf9d2434acb33a549475f78c181f6253"
 [[package]]
 name = "gob-cloudflare"
 version = "0.1.0"
-source = "git+https://github.com/go-bazzinga/gob-cloudflare.git?rev=59033087bcc2f307f8458da86ee2893209b992ef#59033087bcc2f307f8458da86ee2893209b992ef"
+source = "git+https://github.com/go-bazzinga/gob-cloudflare.git?rev=c847ba87ecc73a33520b24bd62503420d7e23e3e#c847ba87ecc73a33520b24bd62503420d7e23e3e"
 dependencies = [
+ "bytes",
  "reqwest",
  "serde",
  "serde_json",
@@ -1827,7 +1878,7 @@ dependencies = [
  "bincode",
  "candid",
  "chrono",
- "derive_more",
+ "derive_more 0.99.8-alpha.0",
  "hex",
  "ic-base-types",
  "ic-btc-types-internal",
@@ -2268,6 +2319,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69a7e111d946bb915d712df496728ca2a120b1b5643f66c580f13023bce46fda"
 dependencies = [
  "ntex-bytes",
+]
+
+[[package]]
+name = "ntex-cors"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "33923472f6c4966b86fe07ab82b3ebb5d0b35102c10346f337ddd5d753a5f156"
+dependencies = [
+ "derive_more 0.99.17",
+ "futures",
+ "ntex",
 ]
 
 [[package]]
@@ -4343,7 +4405,7 @@ checksum = "09041cd90cf85f7f8b2df60c646f853b7f535ce68f85244eb6731cf89fa498ec"
 [[package]]
 name = "yral-identity"
 version = "0.1.0"
-source = "git+https://github.com/go-bazzinga/yral-identity.git?rev=6ed9acfd9d98a16db457ea1e2ebf2ba76626c426#6ed9acfd9d98a16db457ea1e2ebf2ba76626c426"
+source = "git+https://github.com/go-bazzinga/yral-identity.git?rev=346f61f5bf07b619be8dfc3d041dc665c4c66113#346f61f5bf07b619be8dfc3d041dc665c4c66113"
 dependencies = [
  "candid",
  "ic-agent",
@@ -4375,6 +4437,7 @@ dependencies = [
  "gob-cloudflare",
  "log",
  "ntex",
+ "ntex-cors",
  "serde",
  "thiserror",
  "yral-identity",
