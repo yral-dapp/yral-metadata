@@ -1,0 +1,4 @@
+/target/
+!/target/x86_64-unknown-linux-musl/release/yral-metadata-server
+
+fly.toml
