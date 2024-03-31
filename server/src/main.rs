@@ -9,7 +9,7 @@ use ntex::web;
 use api::*;
 use error::*;
 use ntex_cors::Cors;
-use state::AppState;
+use state::{AppState, RedisPool};
 
 pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
     CloudflareAuth::new(Credentials {
@@ -18,8 +18,10 @@ pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
     })
 }
 
-pub fn init_redis(conf: &AppConfig) -> redis::Client {
-    redis::Client::open(conf.redis_url.clone()).expect("failed to open connection to redis")
+pub async fn init_redis(conf: &AppConfig) -> RedisPool {
+    let manager = bb8_redis::RedisConnectionManager::new(conf.redis_url.clone())
+        .expect("failed to open connection to redis");
+    RedisPool::builder().build(manager).await.unwrap()
 }
 
 #[ntex::main]
@@ -31,7 +33,7 @@ async fn main() -> Result<()> {
     let state = AppState {
         cloudflare,
         kv_namespace: KvNamespace::new(conf.cloudflare_kv_namespace.clone()),
-        redis: init_redis(&conf),
+        redis: init_redis(&conf).await,
     };
 
     web::HttpServer::new(move || {

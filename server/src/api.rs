@@ -21,7 +21,7 @@ async fn set_user_metadata(
     signature.verify_identity(*user_principal.as_ref(), metadata.clone().into())?;
 
     let user = user_principal.to_text();
-    let mut conn = state.redis.get_multiplexed_tokio_connection().await?;
+    let mut conn = state.redis.get().await?;
     let meta_raw = serde_json::to_vec(&metadata).expect("failed to serialize user metadata?!");
     let _replaced: bool = conn.hset(user, METADATA_FIELD, &meta_raw).await?;
 
@@ -35,7 +35,7 @@ async fn get_user_metadata(
 ) -> Result<Json<ApiResult<GetUserMetadataRes>>> {
     let user = path.to_text();
 
-    let mut conn = state.redis.get_multiplexed_tokio_connection().await?;
+    let mut conn = state.redis.get().await?;
     let meta_raw: Option<Box<[u8]>> = conn.hget(&user, METADATA_FIELD).await?;
     let Some(meta_raw) = meta_raw else {
         return Ok(Json(Ok(None)));

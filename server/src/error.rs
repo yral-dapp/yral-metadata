@@ -18,6 +18,8 @@ pub enum Error {
     Identity(#[from] yral_identity::Error),
     #[error("{0}")]
     Redis(#[from] RedisError),
+    #[error("{0}")]
+    Bb8(#[from] bb8::RunError<RedisError>),
     #[error("failed to deserialize json {0}")]
     Deser(serde_json::Error),
 }
@@ -36,6 +38,10 @@ impl From<&Error> for ApiResult<()> {
             }
             Error::Redis(e) => {
                 log::warn!("redis error {e}");
+                ApiError::Redis
+            }
+            Error::Bb8(e) => {
+                log::warn!("bb8 error {e}");
                 ApiError::Redis
             }
             Error::Deser(e) => {
@@ -61,7 +67,8 @@ impl web::error::WebResponseError for Error {
             | Error::Config(_)
             | Error::Cloudflare(_)
             | Error::Redis(_)
-            | Error::Deser(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            | Error::Deser(_)
+            | Error::Bb8(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Identity(_) => StatusCode::UNAUTHORIZED,
         }
     }
