@@ -1,0 +1,35 @@
+name: Deploy to Fly on push to main
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master 
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      publish-artifact: true
+  
+  deploy:
+    name: Deploy
+    needs: build 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download build
+        uses: actions/download-artifact@v3
+        with:
+          name: build-musl
+      - run: chmod +x target/x86_64-unknown-linux-musl/release/yral-metadata-server
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Set secret tokens
+        run: |
+          flyctl secrets set REDIS_URL=$REDIS_URL --app "yral-metadata" --stage
+        env:
+          REDIS_URL: ${{ secrets.AUTH_FLY_IO_UPSTASH_REDIS_DATABASE_CONNECTION_STRING }}
+          FLY_API_TOKEN: ${{ secrets.AUTH_METADATA_MICROSERVICE_FLY_IO_GITHUB_ACTION }}
+      - name: Deploy a docker container to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.AUTH_METADATA_MICROSERVICE_FLY_IO_GITHUB_ACTION }}
