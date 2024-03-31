@@ -3134,8 +3134,6 @@ dependencies = [
  "rustls-pemfile 2.1.1",
  "rustls-pki-types",
  "ryu",
- "serde",
- "serde_json",
  "sha1_smol",
  "socket2",
  "tokio",
