@@ -37,23 +37,10 @@ async fn get_user_metadata(
 
     let mut conn = state.redis.get_multiplexed_tokio_connection().await?;
     let meta_raw: Option<Box<[u8]>> = conn.hget(&user, METADATA_FIELD).await?;
-    if let Some(meta_raw) = meta_raw {
-        let meta: UserMetadata = serde_json::from_slice(&meta_raw).map_err(Error::Deser)?;
-        return Ok(Json(Ok(Some(meta))));
-    }
-
-    // fallback: lookup from cloudflare
-    let req = state.kv_namespace.read_kv_metadata::<UserMetadata>(user);
-    let res = state.cloudflare.send_auth(req).await;
-    let meta = match res {
-        Ok(meta) => Some(meta.0),
-        Err(gob_cloudflare::Error::Cloudflare(e))
-            if e[0].message == "metadata: 'key not found'" =>
-        {
-            None
-        }
-        Err(e) => return Err(e.into()),
+    let Some(meta_raw) = meta_raw else {
+        return Ok(Json(Ok(None)));
     };
+    let meta: UserMetadata = serde_json::from_slice(&meta_raw).map_err(Error::Deser)?;
 
-    Ok(Json(Ok(meta)))
+    Ok(Json(Ok(Some(meta))))
 }
