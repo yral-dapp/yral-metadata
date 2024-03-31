@@ -8,6 +8,10 @@ pub enum ApiError {
     Cloudflare,
     #[error("invalid signature provided")]
     InvalidSignature,
+    #[error("internal error: redis")]
+    Redis,
+    #[error("internal error: deser")]
+    Deser,
     #[error("unknown: {0}")]
     Unknown(String),
 }

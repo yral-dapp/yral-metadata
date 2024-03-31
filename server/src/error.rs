@@ -2,6 +2,7 @@ use ntex::{
     http::{header, StatusCode},
     web,
 };
+use redis::RedisError;
 use thiserror::Error;
 use types::{error::ApiError, ApiResult};
 
@@ -15,6 +16,10 @@ pub enum Error {
     Cloudflare(#[from] gob_cloudflare::Error),
     #[error("{0}")]
     Identity(#[from] yral_identity::Error),
+    #[error("{0}")]
+    Redis(#[from] RedisError),
+    #[error("failed to deserialize json {0}")]
+    Deser(serde_json::Error),
 }
 
 impl From<&Error> for ApiResult<()> {
@@ -28,6 +33,14 @@ impl From<&Error> for ApiResult<()> {
             Error::Cloudflare(e) => {
                 log::warn!("cloudflare error {e}");
                 ApiError::Cloudflare
+            }
+            Error::Redis(e) => {
+                log::warn!("redis error {e}");
+                ApiError::Redis
+            }
+            Error::Deser(e) => {
+                log::warn!("deserialization error {e}");
+                ApiError::Deser
             }
         };
         ApiResult::Err(err)
@@ -44,9 +57,11 @@ impl web::error::WebResponseError for Error {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Error::IO(_) | Error::Config(_) | Error::Cloudflare(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            Error::IO(_)
+            | Error::Config(_)
+            | Error::Cloudflare(_)
+            | Error::Redis(_)
+            | Error::Deser(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Identity(_) => StatusCode::UNAUTHORIZED,
         }
     }

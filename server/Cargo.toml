@@ -11,7 +11,10 @@ ntex-cors = "1.0.0"
 serde.workspace = true
 types = { path = "../types", package = "yral-metadata-types" }
 gob-cloudflare = { git = "https://github.com/go-bazzinga/gob-cloudflare.git", rev = "c847ba87ecc73a33520b24bd62503420d7e23e3e", default-features = false, features = ["rustls-tls"] }
+redis = { version = "0.25.2", features = ["tokio-rustls-comp", "r2d2", "ahash", "connection-manager", "keep-alive", "json"] }
 config = { version = "0.14.0", features = ["toml"] }
+serde_json = "1.0.115"
+serde_with = "3.7.0"
 thiserror.workspace = true
 candid.workspace = true
 log.workspace = true

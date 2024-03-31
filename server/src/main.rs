@@ -18,6 +18,10 @@ pub fn init_cloudflare(conf: &AppConfig) -> CloudflareAuth {
     })
 }
 
+pub fn init_redis(conf: &AppConfig) -> redis::Client {
+    redis::Client::open(conf.redis_url.clone()).expect("failed to open connection to redis")
+}
+
 #[ntex::main]
 async fn main() -> Result<()> {
     let conf = AppConfig::load()?;
@@ -26,7 +30,8 @@ async fn main() -> Result<()> {
     let cloudflare = init_cloudflare(&conf);
     let state = AppState {
         cloudflare,
-        kv_namespace: KvNamespace::new(conf.cloudflare_kv_namespace),
+        kv_namespace: KvNamespace::new(conf.cloudflare_kv_namespace.clone()),
+        redis: init_redis(&conf),
     };
 
     web::HttpServer::new(move || {

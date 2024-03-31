@@ -1,14 +1,19 @@
 use std::net::SocketAddr;
 
 use config::{Config, ConfigError, Environment, File};
+use redis::ConnectionInfo;
 use serde::Deserialize;
+use serde_with::{serde_as, DisplayFromStr};
 
+#[serde_as]
 #[derive(Deserialize)]
 pub struct AppConfig {
     pub bind_address: SocketAddr,
     pub cloudflare_account_id: String,
     pub cloudflare_token: String,
     pub cloudflare_kv_namespace: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub redis_url: ConnectionInfo,
 }
 
 impl AppConfig {
