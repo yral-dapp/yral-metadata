@@ -10,7 +10,6 @@ ntex = { version = "1.2.1", features = ["tokio"] }
 ntex-cors = "1.0.0"
 serde.workspace = true
 types = { path = "../types", package = "yral-metadata-types" }
-gob-cloudflare = { git = "https://github.com/go-bazzinga/gob-cloudflare.git", rev = "c847ba87ecc73a33520b24bd62503420d7e23e3e", default-features = false, features = ["rustls-tls"] }
 redis = { version = "0.25.2", features = ["tokio-rustls-comp", "aio", "ahash", "connection-manager", "keep-alive"] }
 config = { version = "0.14.0", features = ["toml"] }
 serde_json = "1.0.115"

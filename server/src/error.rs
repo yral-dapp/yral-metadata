@@ -13,8 +13,6 @@ pub enum Error {
     #[error("failed to load config {0}")]
     Config(#[from] config::ConfigError),
     #[error("{0}")]
-    Cloudflare(#[from] gob_cloudflare::Error),
-    #[error("{0}")]
     Identity(#[from] yral_identity::Error),
     #[error("{0}")]
     Redis(#[from] RedisError),
@@ -32,10 +30,6 @@ impl From<&Error> for ApiResult<()> {
                 ApiError::Unknown("internal error, reported".into())
             }
             Error::Identity(_) => ApiError::InvalidSignature,
-            Error::Cloudflare(e) => {
-                log::warn!("cloudflare error {e}");
-                ApiError::Cloudflare
-            }
             Error::Redis(e) => {
                 log::warn!("redis error {e}");
                 ApiError::Redis
@@ -63,12 +57,9 @@ impl web::error::WebResponseError for Error {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Error::IO(_)
-            | Error::Config(_)
-            | Error::Cloudflare(_)
-            | Error::Redis(_)
-            | Error::Deser(_)
-            | Error::Bb8(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::IO(_) | Error::Config(_) | Error::Redis(_) | Error::Deser(_) | Error::Bb8(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             Error::Identity(_) => StatusCode::UNAUTHORIZED,
         }
     }
