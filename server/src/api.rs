@@ -1,10 +1,15 @@
+use std::env;
+
 use candid::Principal;
 use ntex::web::{
     self,
+    error::ErrorUnauthorized,
     types::{Json, Path, State},
 };
 use redis::AsyncCommands;
-use types::{ApiResult, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
+use types::{
+    ApiResult, BulkUsers, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata,
+};
 
 use crate::{state::AppState, Error, Result};
 
@@ -43,4 +48,32 @@ async fn get_user_metadata(
     let meta: UserMetadata = serde_json::from_slice(&meta_raw).map_err(Error::Deser)?;
 
     Ok(Json(Ok(Some(meta))))
+}
+
+#[web::delete("/metadata/bulk")]
+async fn delete_metadata_bulk(
+    state: State<AppState>,
+    req: Json<BulkUsers>,
+    http_req: web::HttpRequest,
+) -> Result<Json<ApiResult<()>>> {
+    // authorize the request
+    let req_auth_token = http_req
+        .headers()
+        .get("Authorization")
+        .ok_or(Error::AuthToken("No Authorization header".to_string()))?;
+    let auth_token = env::var("OFF_CHAIN_AGENT_TOKEN")
+        .map_err(|_| Error::AuthToken("OFF_CHAIN_AGENT_TOKEN not set".to_string()))?;
+    if *req_auth_token != format!("Bearer {}", auth_token) {
+        return Err(Error::AuthToken("Invalid Authorization header".to_string()));
+    }
+
+    let keys = req.users.iter().map(|p| p.to_text()).collect::<Vec<_>>();
+
+    let mut conn = state.redis.get().await?;
+    match conn.del::<Vec<String>, bool>(keys).await {
+        Ok(bool) => (),
+        Err(e) => return Err(Error::Redis(e).into()),
+    };
+
+    Ok(Json(Ok(())))
 }

@@ -31,6 +31,7 @@ async fn main() -> Result<()> {
             .state(state.clone())
             .service(set_user_metadata)
             .service(get_user_metadata)
+            .service(delete_metadata_bulk)
     })
     .bind(conf.bind_address)?
     .run()

@@ -10,6 +10,8 @@ pub enum ApiError {
     Redis,
     #[error("internal error: deser")]
     Deser,
+    #[error("auth token")]
+    AuthToken(String),
     #[error("unknown: {0}")]
     Unknown(String),
 }
