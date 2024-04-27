@@ -1,17 +1,18 @@
 use std::env;
 
 use candid::Principal;
+use futures::prelude::*;
 use ntex::web::{
     self,
     error::ErrorUnauthorized,
     types::{Json, Path, State},
 };
-use redis::AsyncCommands;
+use redis::{AsyncCommands, RedisError};
 use types::{
     ApiResult, BulkUsers, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata,
 };
 
-use crate::{state::AppState, Error, Result};
+use crate::{auth::verify_token, state::AppState, Error, Result};
 
 const METADATA_FIELD: &str = "metadata";
 
@@ -56,24 +57,48 @@ async fn delete_metadata_bulk(
     req: Json<BulkUsers>,
     http_req: web::HttpRequest,
 ) -> Result<Json<ApiResult<()>>> {
-    // authorize the request
-    let req_auth_token = http_req
+    // verify token
+    let token = http_req
         .headers()
         .get("Authorization")
-        .ok_or(Error::AuthToken("No Authorization header".to_string()))?;
-    let auth_token = env::var("OFF_CHAIN_AGENT_TOKEN")
-        .map_err(|_| Error::AuthToken("OFF_CHAIN_AGENT_TOKEN not set".to_string()))?;
-    if *req_auth_token != format!("Bearer {}", auth_token) {
-        return Err(Error::AuthToken("Invalid Authorization header".to_string()));
+        .ok_or(Error::AuthToken("missing Authorization header".to_string()))?
+        .to_str()
+        .map_err(|_| Error::AuthToken("invalid Authorization header".to_string()))?;
+    let token = token.trim_start_matches("Bearer ");
+    match verify_token(token) {
+        Ok(true) => (),
+        Ok(false) => return Err(Error::AuthToken("invalid token".to_string())),
+        Err(e) => return Err(Error::AuthToken(e.to_string())),
     }
 
     let keys = req.users.iter().map(|p| p.to_text()).collect::<Vec<_>>();
 
     let mut conn = state.redis.get().await?;
-    match conn.del::<Vec<String>, bool>(keys).await {
-        Ok(bool) => (),
-        Err(e) => return Err(Error::Redis(e).into()),
-    };
+
+    let futures_iter = keys.iter().map(|key| async {
+        let res = conn
+            .clone()
+            .hdel::<_, _, bool>(key.to_string(), METADATA_FIELD)
+            .await;
+        match res {
+            Ok(_) => Ok(()),
+            Err(e) => Err((key.to_string(), e.to_string())),
+        }
+    });
+    let stream = futures::stream::iter(futures_iter)
+        .boxed()
+        .buffer_unordered(100);
+    let results = stream.collect::<Vec<Result<_, (String, String)>>>().await;
+    let errors = results
+        .into_iter()
+        .filter_map(|res| match res {
+            Ok(_) => None,
+            Err((key, e)) => Some((key, e)),
+        })
+        .collect::<Vec<_>>();
+    if !errors.is_empty() {
+        log::error!("Failed to delete metadata for some users: {:?}", errors);
+    }
 
     Ok(Json(Ok(())))
 }

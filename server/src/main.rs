@@ -1,5 +1,7 @@
 mod api;
+mod auth;
 mod config;
+mod consts;
 mod error;
 mod state;
 use config::AppConfig;
