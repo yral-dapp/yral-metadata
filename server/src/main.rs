@@ -4,6 +4,7 @@ mod config;
 mod consts;
 mod error;
 mod state;
+use auth::init_jwt;
 use config::AppConfig;
 use ntex::web;
 
@@ -25,6 +26,7 @@ async fn main() -> Result<()> {
 
     let state = AppState {
         redis: init_redis(&conf).await,
+        jwt_details: init_jwt(),
     };
 
     web::HttpServer::new(move || {

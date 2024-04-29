@@ -1,3 +1,5 @@
+use std::error;
+
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -10,8 +12,14 @@ pub enum ApiError {
     Redis,
     #[error("internal error: deser")]
     Deser,
-    #[error("auth token")]
-    AuthToken(String),
+    #[error("jwt error - invalid token")]
+    Jwt,
+    #[error("invalid authentication token")]
+    AuthToken,
+    #[error("missing authentication token")]
+    AuthTokenMissing,
+    #[error("error deleting few keys: {0}")]
+    DeleteKeys(String),
     #[error("unknown: {0}")]
     Unknown(String),
 }
