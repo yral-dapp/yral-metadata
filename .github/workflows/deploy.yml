@@ -30,7 +30,7 @@ jobs:
         env:
           REDIS_URL: ${{ secrets.AUTH_FLY_IO_UPSTASH_REDIS_DATABASE_CONNECTION_STRING }}
           FLY_API_TOKEN: ${{ secrets.AUTH_METADATA_MICROSERVICE_FLY_IO_GITHUB_ACTION }}
-          JWT_PUBLIC_KEY: ${{ secrets.AUTH_OFF_CHAIN_AGENT_YRAL_PUBLIC_KEY }}
+          JWT_PUBLIC_KEY: ${{ secrets.AUTH_OFF_CHAIN_AGENT_YRAL_METADATA_PUBLIC_KEY }}
       - name: Deploy a docker container to Fly.io
         run: flyctl deploy --remote-only
         env:
