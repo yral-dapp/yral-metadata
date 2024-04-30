@@ -1,7 +1,10 @@
 mod api;
+mod auth;
 mod config;
+mod consts;
 mod error;
 mod state;
+use auth::init_jwt;
 use config::AppConfig;
 use ntex::web;
 
@@ -23,6 +26,7 @@ async fn main() -> Result<()> {
 
     let state = AppState {
         redis: init_redis(&conf).await,
+        jwt_details: init_jwt(&conf),
     };
 
     web::HttpServer::new(move || {
@@ -31,6 +35,7 @@ async fn main() -> Result<()> {
             .state(state.clone())
             .service(set_user_metadata)
             .service(get_user_metadata)
+            .service(delete_metadata_bulk)
     })
     .bind(conf.bind_address)?
     .run()

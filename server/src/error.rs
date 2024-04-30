@@ -20,6 +20,12 @@ pub enum Error {
     Bb8(#[from] bb8::RunError<RedisError>),
     #[error("failed to deserialize json {0}")]
     Deser(serde_json::Error),
+    #[error("jwt {0}")]
+    Jwt(#[from] jsonwebtoken::errors::Error),
+    #[error("auth token missing")]
+    AuthTokenMissing,
+    #[error("auth token invalid")]
+    AuthTokenInvalid,
 }
 
 impl From<&Error> for ApiResult<()> {
@@ -42,6 +48,9 @@ impl From<&Error> for ApiResult<()> {
                 log::warn!("deserialization error {e}");
                 ApiError::Deser
             }
+            Error::Jwt(_) => ApiError::Jwt,
+            Error::AuthTokenMissing => ApiError::AuthTokenMissing,
+            Error::AuthTokenInvalid => ApiError::AuthToken,
         };
         ApiResult::Err(err)
     }
@@ -60,7 +69,10 @@ impl web::error::WebResponseError for Error {
             Error::IO(_) | Error::Config(_) | Error::Redis(_) | Error::Deser(_) | Error::Bb8(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
-            Error::Identity(_) => StatusCode::UNAUTHORIZED,
+            Error::Identity(_)
+            | Error::Jwt(_)
+            | Error::AuthTokenInvalid
+            | Error::AuthTokenMissing => StatusCode::UNAUTHORIZED,
         }
     }
 }

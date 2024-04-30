@@ -31,3 +31,10 @@ pub struct SetUserMetadataReq {
 pub type SetUserMetadataRes = ();
 
 pub type GetUserMetadataRes = Option<UserMetadata>;
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
+pub struct BulkUsers {
+    pub users: Vec<Principal>,
+}
+
+pub type DeleteMetadataBulkRes = ();

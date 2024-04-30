@@ -6,30 +6,38 @@ pub use error::*;
 use consts::DEFAULT_API_URL;
 
 use ic_agent::{export::Principal, Identity};
-use reqwest::Url;
-use types::{ApiResult, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata};
+use reqwest::{
+    header::{HeaderMap, HeaderValue, AUTHORIZATION},
+    Url,
+};
+use types::{
+    ApiResult, BulkUsers, GetUserMetadataRes, SetUserMetadataReq, SetUserMetadataRes, UserMetadata,
+};
 use yral_identity::ic_agent::sign_message;
 
 #[derive(Clone, Debug)]
-pub struct MetadataClient {
+pub struct MetadataClient<const AUTH: bool> {
     base_url: Url,
     client: reqwest::Client,
+    jwt_token: Option<String>,
 }
 
-impl Default for MetadataClient {
+impl Default for MetadataClient<false> {
     fn default() -> Self {
         Self {
             base_url: Url::parse(DEFAULT_API_URL).unwrap(),
             client: Default::default(),
+            jwt_token: None,
         }
     }
 }
 
-impl MetadataClient {
+impl<const A: bool> MetadataClient<A> {
     pub fn with_base_url(base_url: Url) -> Self {
         Self {
             base_url,
             client: Default::default(),
+            jwt_token: None,
         }
     }
 
@@ -73,6 +81,36 @@ impl MetadataClient {
         let res = self.client.get(api_url).send().await?;
 
         let res: ApiResult<GetUserMetadataRes> = res.json().await?;
+        Ok(res?)
+    }
+}
+
+impl MetadataClient<true> {
+    pub fn with_jwt_token(self, jwt_token: String) -> Self {
+        Self {
+            jwt_token: Some(jwt_token),
+            ..self
+        }
+    }
+
+    pub async fn delete_metadata_bulk(&self, users: Vec<Principal>) -> Result<()> {
+        let api_url = self.base_url.join("metadata/bulk").unwrap();
+
+        let jwt_token = self.jwt_token.as_ref().expect("jwt token not set");
+        let mut headers = HeaderMap::new();
+        headers.insert(AUTHORIZATION, HeaderValue::from_str(jwt_token).unwrap());
+
+        let body = BulkUsers { users };
+
+        let res = self
+            .client
+            .delete(api_url)
+            .json(&body)
+            .headers(headers)
+            .send()
+            .await?;
+
+        let res: ApiResult<()> = res.json().await?;
         Ok(res?)
     }
 }

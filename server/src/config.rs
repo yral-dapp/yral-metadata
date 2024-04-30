@@ -11,6 +11,7 @@ pub struct AppConfig {
     pub bind_address: SocketAddr,
     #[serde_as(as = "DisplayFromStr")]
     pub redis_url: ConnectionInfo,
+    pub jwt_public_key: String,
 }
 
 impl AppConfig {
