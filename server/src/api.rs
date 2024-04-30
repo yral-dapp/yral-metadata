@@ -68,7 +68,7 @@ async fn delete_metadata_bulk(
     let token = token.trim_start_matches("Bearer ");
     verify_token(token, &state.jwt_details)?;
 
-    let keys = req.users.iter().map(|p| p.to_text()).collect::<Vec<_>>();
+    let keys = req.users;
 
     let mut conn = state.redis.get().await?;
 
@@ -78,7 +78,7 @@ async fn delete_metadata_bulk(
             conn.clone()
                 .hdel::<_, _, bool>(key.to_string(), METADATA_FIELD)
                 .await
-                .map_err(|e| (key.to_string(), e.to_string()))
+                .map_err(|e| (key, e))
         })
         .collect();
     let results = futures.collect::<Vec<Result<_, (String, String)>>>().await;
@@ -88,12 +88,11 @@ async fn delete_metadata_bulk(
             Ok(_) => None,
             Err((key, e)) => Some((key, e)),
         })
-        .map(|(key, e)| format!("{}: {}", key, e))
-        .collect::<Vec<String>>()
-        .join("; ");
+        .collect::<Vec<_>>();
 
     if !errors.is_empty() {
-        return Ok(Json(Err(ApiError::DeleteKeys(errors))));
+        log::error!("failed to delete keys: {:?}", errors);
+        return Ok(Json(Err(ApiError::DeleteKeys)));
     }
 
     Ok(Json(Ok(())))

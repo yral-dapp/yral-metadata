@@ -24,3 +24,5 @@ impl AppConfig {
         conf.try_deserialize()
     }
 }
+
+const JWT_PUBLIC_KEY: String = env::var("JWT_PUBLIC_KEY").expect("JWT_PUBLIC_KEY not set");

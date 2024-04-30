@@ -18,7 +18,7 @@ pub enum ApiError {
     AuthToken,
     #[error("missing authentication token")]
     AuthTokenMissing,
-    #[error("error deleting few keys: {0}")]
+    #[error("failed to delete keys (redis)")]
     DeleteKeys(String),
     #[error("unknown: {0}")]
     Unknown(String),

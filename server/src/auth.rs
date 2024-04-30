@@ -19,10 +19,8 @@ pub struct JwtDetails {
 }
 
 pub fn init_jwt() -> JwtDetails {
-    let public_key = env::var("JWT_PUBLIC_KEY").expect("JWT_PUBLIC_KEY not set");
-
     let decoding_key =
-        DecodingKey::from_ed_pem(public_key.as_bytes()).expect("failed to create decoding key");
+        DecodingKey::from_ed_pem(JWT_PUBLIC_KEY.as_bytes()).expect("failed to create decoding key");
 
     let mut validation = Validation::new(Algorithm::EdDSA);
 
