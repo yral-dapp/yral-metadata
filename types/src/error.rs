@@ -1,5 +1,3 @@
-use std::error;
-
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -19,7 +17,7 @@ pub enum ApiError {
     #[error("missing authentication token")]
     AuthTokenMissing,
     #[error("failed to delete keys (redis)")]
-    DeleteKeys(String),
+    DeleteKeys,
     #[error("unknown: {0}")]
     Unknown(String),
 }

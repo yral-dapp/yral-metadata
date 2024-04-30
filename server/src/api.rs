@@ -1,10 +1,7 @@
-use std::env;
-
 use candid::Principal;
 use futures::{prelude::*, stream::FuturesUnordered};
 use ntex::web::{
     self,
-    error::ErrorUnauthorized,
     types::{Json, Path, State},
 };
 use redis::{AsyncCommands, RedisError};
@@ -68,20 +65,22 @@ async fn delete_metadata_bulk(
     let token = token.trim_start_matches("Bearer ");
     verify_token(token, &state.jwt_details)?;
 
-    let keys = req.users;
+    let keys = &req.users;
 
-    let mut conn = state.redis.get().await?;
+    let conn = state.redis.get().await?;
 
     let futures: FuturesUnordered<_> = keys
         .iter()
         .map(|key| async {
             conn.clone()
-                .hdel::<_, _, bool>(key.to_string(), METADATA_FIELD)
+                .hdel::<_, _, bool>(key.to_text(), METADATA_FIELD)
                 .await
-                .map_err(|e| (key, e))
+                .map_err(|e| (key.to_text(), e))
         })
         .collect();
-    let results = futures.collect::<Vec<Result<_, (String, String)>>>().await;
+    let results = futures
+        .collect::<Vec<Result<_, (String, RedisError)>>>()
+        .await;
     let errors = results
         .into_iter()
         .filter_map(|res| match res {

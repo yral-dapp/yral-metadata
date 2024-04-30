@@ -11,6 +11,7 @@ pub struct AppConfig {
     pub bind_address: SocketAddr,
     #[serde_as(as = "DisplayFromStr")]
     pub redis_url: ConnectionInfo,
+    pub jwt_public_key: String,
 }
 
 impl AppConfig {
@@ -24,5 +25,3 @@ impl AppConfig {
         conf.try_deserialize()
     }
 }
-
-const JWT_PUBLIC_KEY: String = env::var("JWT_PUBLIC_KEY").expect("JWT_PUBLIC_KEY not set");

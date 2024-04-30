@@ -1,9 +1,7 @@
-use std::{collections::HashSet, env};
-
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::{consts::CLAIMS, Error};
+use crate::{config::AppConfig, consts::CLAIMS, Error};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Claims {
@@ -18,11 +16,11 @@ pub struct JwtDetails {
     pub validation: Validation,
 }
 
-pub fn init_jwt() -> JwtDetails {
-    let decoding_key =
-        DecodingKey::from_ed_pem(JWT_PUBLIC_KEY.as_bytes()).expect("failed to create decoding key");
+pub fn init_jwt(conf: &AppConfig) -> JwtDetails {
+    let decoding_key = DecodingKey::from_ed_pem(conf.jwt_public_key.as_bytes())
+        .expect("failed to create decoding key");
 
-    let mut validation = Validation::new(Algorithm::EdDSA);
+    let validation = Validation::new(Algorithm::EdDSA);
 
     JwtDetails {
         decoding_key,
@@ -36,7 +34,7 @@ pub fn verify_token(token: &str, jwt_details: &JwtDetails) -> Result<(), Error> 
         validation,
     } = jwt_details;
 
-    let token_message = decode::<Claims>(&token, decoding_key, validation).map_err(Error::Jwt)?;
+    let token_message = decode::<Claims>(token, decoding_key, validation).map_err(Error::Jwt)?;
 
     if token_message.claims != *CLAIMS {
         return Err(Error::AuthTokenInvalid);

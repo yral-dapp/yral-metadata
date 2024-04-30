@@ -16,13 +16,13 @@ use types::{
 use yral_identity::ic_agent::sign_message;
 
 #[derive(Clone, Debug)]
-pub struct MetadataClient {
+pub struct MetadataClient<const AUTH: bool> {
     base_url: Url,
     client: reqwest::Client,
     jwt_token: Option<String>,
 }
 
-impl Default for MetadataClient {
+impl Default for MetadataClient<false> {
     fn default() -> Self {
         Self {
             base_url: Url::parse(DEFAULT_API_URL).unwrap(),
@@ -32,19 +32,12 @@ impl Default for MetadataClient {
     }
 }
 
-impl MetadataClient {
+impl<const A: bool> MetadataClient<A> {
     pub fn with_base_url(base_url: Url) -> Self {
         Self {
             base_url,
             client: Default::default(),
             jwt_token: None,
-        }
-    }
-
-    pub fn with_jwt_token(self, jwt_token: String) -> Self {
-        Self {
-            jwt_token: Some(jwt_token),
-            ..self
         }
     }
 
@@ -89,6 +82,15 @@ impl MetadataClient {
 
         let res: ApiResult<GetUserMetadataRes> = res.json().await?;
         Ok(res?)
+    }
+}
+
+impl MetadataClient<true> {
+    pub fn with_jwt_token(self, jwt_token: String) -> Self {
+        Self {
+            jwt_token: Some(jwt_token),
+            ..self
+        }
     }
 
     pub async fn delete_metadata_bulk(&self, users: Vec<Principal>) -> Result<()> {

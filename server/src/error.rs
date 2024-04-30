@@ -48,7 +48,7 @@ impl From<&Error> for ApiResult<()> {
                 log::warn!("deserialization error {e}");
                 ApiError::Deser
             }
-            Error::Jwt(e) => ApiError::Jwt,
+            Error::Jwt(_) => ApiError::Jwt,
             Error::AuthTokenMissing => ApiError::AuthTokenMissing,
             Error::AuthTokenInvalid => ApiError::AuthToken,
         };

@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     let state = AppState {
         redis: init_redis(&conf).await,
-        jwt_details: init_jwt(),
+        jwt_details: init_jwt(&conf),
     };
 
     web::HttpServer::new(move || {
