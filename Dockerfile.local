@@ -1,0 +1,35 @@
+FROM clux/muslrust:stable AS chef
+USER root
+RUN cargo install cargo-chef
+WORKDIR /app
+
+FROM chef as planner
+
+WORKDIR /app
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef as build 
+
+WORKDIR /app
+
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN apt-get update && apt-get install -y protobuf-compiler --no-install-recommends && \
+  rm -rf /var/lib/apt/lists/*
+
+
+COPY . .
+
+RUN ./build-server.sh
+
+FROM redis:alpine as runner
+
+WORKDIR /app
+
+COPY --from=build /app/target/x86_64-unknown-linux-musl/release/yral-metadata-server .
+COPY ./config.docker.toml config.toml
+COPY ./docker-run.sh .
+ENV RUST_LOG debug
+
+CMD ["./docker-run.sh"]

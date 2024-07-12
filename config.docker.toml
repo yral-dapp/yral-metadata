@@ -1,0 +1,6 @@
+bind_address = "0.0.0.0:8000"
+legacy_bind_address = "0.0.0.0:8001"
+redis_url = "redis://127.0.0.1:6379"
+jwt_public_key = """-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEA+7sElHIjIrCJeIMAWr1qN8vt/r1iuGmZDUR9mn7itq0=
+-----END PUBLIC KEY-----"""
