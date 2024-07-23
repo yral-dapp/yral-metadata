@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Rust Setup
         uses: dtolnay/rust-toolchain@stable
@@ -28,7 +28,7 @@ jobs:
 
       - uses: awalsh128/cache-apt-pkgs-action@v1
         with:
-          packages: musl-tools # provides musl-gcc
+          packages: musl-tools protobuf-compiler # provides musl-gcc
           version: 1.0
 
       - name: Build the project to `musl` output
