@@ -7,4 +7,4 @@ serde = { version = "1.0.197", features = ["derive"] }
 thiserror = "1.0.58"
 candid = "0.10.6"
 log = "0.4.21"
-yral-identity = { git = "https://github.com/go-bazzinga/yral-identity.git", default-features = false, rev = "6df2ed46e422302cb47d22ce30927756ee531a66" }
+yral-identity = { git = "https://github.com/go-bazzinga/yral-identity.git", default-features = false, rev = "156bc0e7a4bc3d9a3b4faab4b9b3048e88a0c701" }
